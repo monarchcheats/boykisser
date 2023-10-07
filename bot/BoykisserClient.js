@@ -38,7 +38,12 @@ export class BoykisserClient {
 
 		client.on(`messageCreate`, async (message) => {
 			if (
-				message.content.toLowerCase().includes(`boykisser`) &&
+				(message.content.toLowerCase().includes(`boykisser`) ||
+					message.content.toLowerCase().includes(`boy kisser`) ||
+					message.content.toLowerCase().includes(`girlkisser`) ||
+					message.content.toLowerCase().includes(`girl kisser`) ||
+					message.content.toLowerCase().includes(`kissing boys`) ||
+					message.content.toLowerCase().includes(`<@${client.user.id}>`)) &&
 				message.author.id !== client.user.id
 			) {
 				Logger.log(`INFO`, `onMessageCreate`, `${message.author.tag} is being a boykisser >~<`);
