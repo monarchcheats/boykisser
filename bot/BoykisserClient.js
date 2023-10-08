@@ -1,6 +1,8 @@
 import { Client } from "discord.js";
-import { GatewayIntentBits } from "discord-api-types/v10";
+import { GatewayIntentBits, PermissionFlagsBits } from "discord-api-types/v10";
 import { Logger } from "../utils/Logger.js";
+import { Boykisser } from "./interactions/commands/Boykisser.js";
+import { Commands } from "./interactions/Commands.js";
 
 export class BoykisserClient {
 	static start(token, repo) {
@@ -21,18 +23,33 @@ export class BoykisserClient {
 		});
 
 		client.on(`interactionCreate`, async (interaction) => {
-			if (!interaction.isChatInputCommand()) {
-				return;
-			}
-
-			if (interaction.commandName === `boykisser`) {
-				Logger.log(
-					`INFO`,
-					`onInteractionCreate`,
-					`${interaction.user.tag} is being a boykisser >~<`
-				);
-
-				await interaction.reply(BoykisserClient.getBoykisser(repo));
+			try {
+				if (interaction.isChatInputCommand()) {
+					const instances = Commands.getCommandInstances();
+					for (let cmd = 0; cmd < instances.length; cmd++) {
+						if (instances[cmd].getSlashCommand().toJSON().name === interaction.commandName) {
+							if (interaction.guild !== null) {
+								Logger.log(
+									`INFO`,
+									`Commands`,
+									`User "${interaction.user.tag}" running command` +
+										` "${interaction.commandName}" in "${interaction.guild.name}"` +
+										` (${interaction.guild.id}).`
+								);
+							} else {
+								Logger.log(
+									`INFO`,
+									`Commands`,
+									`User "${interaction.user.tag}" running command` +
+										` "${interaction.commandName}" in a private channel.`
+								);
+							}
+							await instances[cmd].execInternal(interaction);
+						}
+					}
+				}
+			} catch (e) {
+				Logger.log(`ERROR`, `onInteractionCreate`, `${e}`);
 			}
 		});
 
@@ -51,7 +68,7 @@ export class BoykisserClient {
 				const channel = await client.channels.cache.get(message.channelId);
 				if (channel?.isTextBased()) {
 					Logger.log(`INFO`, `onMessageCreate`, `Sending the boykisser`);
-					const boykisser = await BoykisserClient.getBoykisser(repo);
+					const boykisser = await Boykisser.getBoykisser(repo);
 					await channel.send({ content: boykisser });
 				}
 			}
@@ -61,21 +78,5 @@ export class BoykisserClient {
 			Logger.log(`ERROR`, `onLogin`, `Could not sign into ${token}. Is it valid?`);
 			Logger.log(`ERROR`, `onLogin`, `Exception: ${e}`);
 		});
-	}
-
-	static getRandomInt(max) {
-		return Math.floor(Math.random() * max);
-	}
-
-	static async getBoykisser(repo) {
-		const maximumBoykissers = await (
-			await fetch(`https://cdn.jsdelivr.net/gh/${repo}/max.boykisser`)
-		).text();
-		const maximumBoykissersInteger = parseInt(maximumBoykissers, 16);
-
-		const selectedBoykisserInteger = BoykisserClient.getRandomInt(maximumBoykissersInteger);
-		const selectedBoykisser = selectedBoykisserInteger.toString(16);
-
-		return `https://cdn.jsdelivr.net/gh/${repo}/img/${selectedBoykisser}.gif`;
 	}
 }
