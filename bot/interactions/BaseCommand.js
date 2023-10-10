@@ -1,5 +1,4 @@
 import { Logger } from "../../utils/Logger.js";
-import { PermissionsBitField } from "discord.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -35,14 +34,12 @@ export class BaseCommand {
 	isUserServerPrivileged(interaction) {
 		if (interaction.guild !== null) {
 			if (interaction.member !== null) {
-				const developers = process.env.DEVELOPERS.split(",");
-				for (let x = 0; x < developers.length; x++) {
-					if (interaction.user.id === developers[x]) {
-						return true;
-					}
-				}
+				const developers = process.env.DEVELOPERS;
 
-				return interaction.memberPermissions.toArray().includes("ManageGuild");
+				return (
+					interaction.memberPermissions.toArray().includes("ManageGuild") ||
+					developers.includes(`,${interaction.user.id},`)
+				);
 			}
 		}
 
