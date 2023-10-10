@@ -34,7 +34,7 @@ export class BaseCommand {
 	isUserServerPrivileged(interaction) {
 		if (interaction.guild !== null) {
 			if (interaction.member !== null) {
-				const developers = process.env.DEVELOPERS;
+				const developers = `${process.env.DEVELOPERS}`;
 
 				return (
 					interaction.memberPermissions.toArray().includes("ManageGuild") ||
