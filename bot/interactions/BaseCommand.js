@@ -34,11 +34,11 @@ export class BaseCommand {
 	isUserServerPrivileged(interaction) {
 		if (interaction.guild !== null) {
 			if (interaction.member !== null) {
-				const developers = `${process.env.DEVELOPERS}`;
+				const developers = process.env.DEVELOPERS.split(",");
 
 				return (
 					interaction.memberPermissions.toArray().includes("ManageGuild") ||
-					developers.includes(`,${interaction.user.id},`)
+					developers.includes(interaction.user.id)
 				);
 			}
 		}
